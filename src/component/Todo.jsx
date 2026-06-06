@@ -1,21 +1,48 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import "../index.css";
+import gsap from "gsap"
+import {useGSAP} from "@gsap/react";
+
 const Todo = () => {
-    
-    
-    
-    const [add, setAdd] = useState(()=>{
-        const savedData = localStorage.getItem("todos");
-        return savedData ? JSON.parse(savedData):[];
+  
+  const [add, setAdd] = useState(()=>{
+    const savedData = localStorage.getItem("todos");
+    return savedData ? JSON.parse(savedData):[];
+  });
+  const prevLength = useRef(add.length);
+  useGSAP(()=>{
+    if (add.length > prevLength.current) {
+    const cards = document.querySelectorAll(".card-container");
+    gsap.from(cards[cards.length - 1],{
+      y:-50,
+      opacity:0,
+      duration:0.5,
+      ease:"power3.out"
     });
+  }
+  prevLength.current = add.length;
+  },{dependencies:[add]});
+    
     
     const [text, setText] = useState("");
     const [edit, setEdit] = useState(null);
     const [editText, setEditText] = useState("");
 
+
     useEffect(()=>{
         localStorage.setItem("todos",JSON.stringify(add));
     },[add]);
+
+    
+      useGSAP(()=>{
+        gsap.from(".card-container",{
+          y:-100,
+          opacity:0,
+          stagger:0.2,
+          duration:1,
+        })
+      },{dependencies:[]}
+    );
 
   const handleInput = (e) => {
     setText(e.target.value);
@@ -41,7 +68,7 @@ const Todo = () => {
   };
 
   return (
-    <div className="todo-container">
+    <div  className="todo-container">
       <h1 className="todo-title">Todo List</h1>
       <hr className="w-[90vw]" />
       <input
@@ -67,6 +94,7 @@ const Todo = () => {
           <div
             key={index}
             className="card-container"
+            
           >
             <div>
               {edit === index ? (
